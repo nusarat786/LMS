@@ -19,9 +19,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class HolidayDao {
 
-	private  static String GET_ALL_HOLIDAY_SQL = "SELECT * FROM Holiday";
-	private  static String GET_HOLIDAY_BY_DATE_SQL = "SELECT * FROM Holiday where holiday_date = ?";
-	
+	private static final String GET_ALL_HOLIDAY_SQL = "SELECT * FROM \"HOLIDAY\"";
+
+	private static final String GET_HOLIDAY_BY_DATE_SQL = "SELECT * FROM \"HOLIDAY\" WHERE \"HOLIDAY_DATE\" = ?";
+
 	private static Connection getConnection() throws SQLException {
         return Connection_.getc();
     }

@@ -1,4 +1,5 @@
 package com.admin.userManagement.dao;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -6,9 +7,15 @@ import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.Part;
+import javax.sql.rowset.serial.SerialBlob;
+
+import org.postgresql.largeobject.LargeObject;
+import org.postgresql.largeobject.LargeObjectManager;
 
 import com.admin.userManagement.bean.*;
 import com.connection.*;
@@ -22,31 +29,54 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class EmployeeDao {
 
-	 private static final String INSERT_EMPLOYEE_SQL = "INSERT INTO Employee (FirstName, LastName, Email, Position, Department, DateOfBirth, Gender, PhoneNumber, Address, Status, EmployeePhoto,LeaveBalance) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+//	 private static final String INSERT_EMPLOYEE_SQL = "INSERT INTO Employee (FirstName, LastName, Email, Position, Department, DateOfBirth, Gender, PhoneNumber, Address, Status, EmployeePhoto,LeaveBalance) " +
+//            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+//
+//	 private static final String SELECT_ALL_EMPLOY  = "SELECT * from Employee";
+//	 
+//	 private static final String GET_EMPLOY_ID = "SELECT * from Employee WHERE employeeID = ?";
+//
+//	 private static final String GET_EMPLOY_EMAIL = "SELECT * from Employee WHERE Email = ?";
+//
+//	 
+//	 private static final String UPDATE_EMPLOY = "UPDATE Employee SET FirstName = ?, LastName = ?, Email = ?, Position = ?, Department = ?, "
+//             + "DateOfBirth = ?, Gender = ?, PhoneNumber = ?, Address = ?, Status = ? WHERE employeeID = ?";
+//	 
+//	 private static final String UPDATE_EMPLOY2 = "UPDATE Employee SET FirstName = ?, LastName = ?, Email = ?, Position = ?, Department = ?, "
+//             + "DateOfBirth = ?, Gender = ?, PhoneNumber = ?, Address = ?, Status = ?,EMPLOYEEPHOTO=? WHERE employeeID = ?";
+//
+//	 private static final String UPDATE_EMPLOY3 = "UPDATE Employee SET FirstName = ?, LastName = ?, Email = ?, Position = ?, Department = ?, "
+//             + "DateOfBirth = ?, Gender = ?, PhoneNumber = ?, Address = ?, Status = ?,EMPLOYEEPHOTO=? , ISADMIN=? WHERE employeeID = ?";
+//
+//	 
+//	 private static final String ADD_OTP = "update Employee set OTP=? WHERE employeeID = ?" ;
+//	 
+//	 
+//	 private static final String EMP_LEAVE_JOIN_SQL = "SELECT e.*,l.* FROM employee e JOIN leave_history l ON e.employeeid = l.employee_id";
+//	 
+	
+	private static final String INSERT_EMPLOYEE_SQL = "INSERT INTO \"EMPLOYEE\" (\"FIRSTNAME\", \"LASTNAME\", \"EMAIL\", \"POSITION\", \"DEPARTMENT\", \"DATEOFBIRTH\", \"GENDER\", \"PHONENUMBER\", \"ADDRESS\", \"STATUS\", \"EMPLOYEEPHOTO\", \"LEAVEBALANCE\") " +
+	        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-	 private static final String SELECT_ALL_EMPLOY  = "SELECT * from Employee";
-	 
-	 private static final String GET_EMPLOY_ID = "SELECT * from Employee WHERE employeeID = ?";
+	private static final String SELECT_ALL_EMPLOY = "SELECT * FROM \"EMPLOYEE\"";
 
-	 private static final String GET_EMPLOY_EMAIL = "SELECT * from Employee WHERE Email = ?";
+	private static final String GET_EMPLOY_ID = "SELECT * FROM \"EMPLOYEE\" WHERE \"EMPLOYEEID\" = ?";
 
-	 
-	 private static final String UPDATE_EMPLOY = "UPDATE Employee SET FirstName = ?, LastName = ?, Email = ?, Position = ?, Department = ?, "
-             + "DateOfBirth = ?, Gender = ?, PhoneNumber = ?, Address = ?, Status = ? WHERE employeeID = ?";
-	 
-	 private static final String UPDATE_EMPLOY2 = "UPDATE Employee SET FirstName = ?, LastName = ?, Email = ?, Position = ?, Department = ?, "
-             + "DateOfBirth = ?, Gender = ?, PhoneNumber = ?, Address = ?, Status = ?,EMPLOYEEPHOTO=? WHERE employeeID = ?";
+	private static final String GET_EMPLOY_EMAIL = "SELECT * FROM \"EMPLOYEE\" WHERE \"EMAIL\" = ?";
 
-	 private static final String UPDATE_EMPLOY3 = "UPDATE Employee SET FirstName = ?, LastName = ?, Email = ?, Position = ?, Department = ?, "
-             + "DateOfBirth = ?, Gender = ?, PhoneNumber = ?, Address = ?, Status = ?,EMPLOYEEPHOTO=? , ISADMIN=? WHERE employeeID = ?";
+	private static final String UPDATE_EMPLOY = "UPDATE \"EMPLOYEE\" SET \"FIRSTNAME\" = ?, \"LASTNAME\" = ?, \"EMAIL\" = ?, \"POSITION\" = ?, \"DEPARTMENT\" = ?, " +
+	        "\"DATEOFBIRTH\" = ?, \"GENDER\" = ?, \"PHONENUMBER\" = ?, \"ADDRESS\" = ?, \"STATUS\" = ? WHERE \"EMPLOYEEID\" = ?";
 
-	 
-	 private static final String ADD_OTP = "update Employee set OTP=? WHERE employeeID = ?" ;
-	 
-	 
-	 private static final String EMP_LEAVE_JOIN_SQL = "SELECT e.*,l.* FROM employee e JOIN leave_history l ON e.employeeid = l.employee_id";
-	 
+	private static final String UPDATE_EMPLOY2 = "UPDATE \"EMPLOYEE\" SET \"FIRSTNAME\" = ?, \"LASTNAME\" = ?, \"EMAIL\" = ?, \"POSITION\" = ?, \"DEPARTMENT\" = ?, " +
+	        "\"DATEOFBIRTH\" = ?, \"GENDER\" = ?, \"PHONENUMBER\" = ?, \"ADDRESS\" = ?, \"STATUS\" = ?, \"EMPLOYEEPHOTO\" = ? WHERE \"EMPLOYEEID\" = ?";
+
+	private static final String UPDATE_EMPLOY3 = "UPDATE \"EMPLOYEE\" SET \"FIRSTNAME\" = ?, \"LASTNAME\" = ?, \"EMAIL\" = ?, \"POSITION\" = ?, \"DEPARTMENT\" = ?, " +
+	        "\"DATEOFBIRTH\" = ?, \"GENDER\" = ?, \"PHONENUMBER\" = ?, \"ADDRESS\" = ?, \"STATUS\" = ?, \"EMPLOYEEPHOTO\" = ?, \"ISADMIN\" = ? WHERE \"EMPLOYEEID\" = ?";
+
+	private static final String ADD_OTP = "UPDATE \"EMPLOYEE\" SET \"OTP\" = ? WHERE \"EMPLOYEEID\" = ?";
+
+	private static final String EMP_LEAVE_JOIN_SQL = "SELECT e.*, l.* FROM \"EMPLOYEE\" e JOIN \"LEAVE_HISTORY\" l ON e.\"EMPLOYEEID\" = l.\"EMPLOYEE_ID\"";
+
 	 // insert employ
 	 
 	 public static String insertEmployee(Employee emp,PrintWriter out ) throws Exception  {
@@ -92,46 +122,96 @@ public class EmployeeDao {
 		 }
 	 }
 	 
-	 // insert an employee  
-	 public static int insertEmployeev2(Employee emp) throws SQLIntegrityConstraintViolationException,SQLException  {
-		 int rowsAffected = 0;
-		 String Error = " ";
-		
-		 Connection_ con =  new Connection_();
-		 try(Connection connection = con.getc()){
-		 PreparedStatement preparedStatement = connection.prepareStatement(INSERT_EMPLOYEE_SQL);
-		 
-		 preparedStatement.setString(1, emp.getFirstName());
-         preparedStatement.setString(2, emp.getLastName());
-         preparedStatement.setString(3, emp.getEmail());
-         preparedStatement.setString(4, emp.getPosition());
-         preparedStatement.setString(5, emp.getDepartment());
-         
-         java.sql.Date dateOfBirth = java.sql.Date.valueOf(emp.getDateOfBirth());
-         preparedStatement.setDate(6,dateOfBirth);
-         preparedStatement.setString(7, emp.getGender());
-         preparedStatement.setString(8, emp.getPhoneNumber());
-         preparedStatement.setString(9, emp.getAddress());
-         preparedStatement.setString(10, emp.getStatus());
-         
-         preparedStatement.setBlob(11, emp.getEmployeePhoto());
-             
-         preparedStatement.setDouble(12, emp.getLeaveBalance());
-         //java.sql.SQLException: ORA-17003: Invalid column index
-         rowsAffected = preparedStatement.executeUpdate();
-         
-         
-		 
-		return rowsAffected;
-		 }
+//	 // insert an employee  
+//	 public static int insertEmployeev2(Employee emp) throws SQLIntegrityConstraintViolationException,SQLException  {
+//		 int rowsAffected = 0;
+//		 String Error = " ";
+//		
+//		 Connection_ con =  new Connection_();
+//		 try(Connection connection = con.getc()){
+//		 PreparedStatement preparedStatement = connection.prepareStatement(INSERT_EMPLOYEE_SQL);
+//		 
+//		 preparedStatement.setString(1, emp.getFirstName());
+//         preparedStatement.setString(2, emp.getLastName());
+//         preparedStatement.setString(3, emp.getEmail());
+//         preparedStatement.setString(4, emp.getPosition());
+//         preparedStatement.setString(5, emp.getDepartment());
+//         
+//         java.sql.Date dateOfBirth = java.sql.Date.valueOf(emp.getDateOfBirth());
+//         preparedStatement.setDate(6,dateOfBirth);
+//         preparedStatement.setString(7, emp.getGender());
+//         preparedStatement.setString(8, emp.getPhoneNumber());
+//         preparedStatement.setString(9, emp.getAddress());
+//         preparedStatement.setString(10, emp.getStatus());
+//         
+//        // preparedStatement.setBlob(11, emp.getEmployeePhoto());
+//
+//         
+//         preparedStatement.setBlob(11, emp.getEmployeePhoto());
+//             
+//         preparedStatement.setDouble(12, emp.getLeaveBalance());
+//         //java.sql.SQLException: ORA-17003: Invalid column index
+//         rowsAffected = preparedStatement.executeUpdate();
+//         
+//         
+//		 
+//		return rowsAffected;
+//		 }
+//	 }
+//	 
+//	 
+	 
+	// Insert an employee  
+	 public static int insertEmployeev2(Employee emp) throws SQLIntegrityConstraintViolationException, SQLException {
+	     int rowsAffected = 0;
+	     Connection_ con = new Connection_();
+
+	     try (Connection connection = con.getc()) {
+	         connection.setAutoCommit(false); // Disable auto-commit
+
+	         PreparedStatement preparedStatement = connection.prepareStatement(INSERT_EMPLOYEE_SQL);
+
+	         preparedStatement.setString(1, emp.getFirstName());
+	         preparedStatement.setString(2, emp.getLastName());
+	         preparedStatement.setString(3, emp.getEmail());
+	         preparedStatement.setString(4, emp.getPosition());
+	         preparedStatement.setString(5, emp.getDepartment());
+
+	         java.sql.Date dateOfBirth = java.sql.Date.valueOf(emp.getDateOfBirth());
+	         preparedStatement.setDate(6, dateOfBirth);
+	         preparedStatement.setString(7, emp.getGender());
+	         preparedStatement.setString(8, emp.getPhoneNumber());
+	         preparedStatement.setString(9, emp.getAddress());
+	         preparedStatement.setString(10, emp.getStatus());
+
+	         // Handle employee photo as a byte array
+	         if (emp.getEmployeePhoto() != null) {
+	             // Read the InputStream into a byte array
+	             try (InputStream inputStream = emp.getEmployeePhoto()) {
+	                 byte[] photoBytes = inputStream.readAllBytes(); // Read all bytes from the InputStream
+	                 preparedStatement.setBytes(11, photoBytes); // Set the byte array in the prepared statement
+	             } catch (IOException e) {
+	                 throw new SQLException("Error reading employee photo", e);
+	             }
+	         } else {
+	             preparedStatement.setNull(11, java.sql.Types.BLOB); // Set NULL if there is no photo
+	         }
+
+	         preparedStatement.setDouble(12, emp.getLeaveBalance());
+
+	         // Execute the update
+	         rowsAffected = preparedStatement.executeUpdate();
+
+	         // Commit the transaction
+	         connection.commit();
+	     } catch (SQLException e) {
+	         throw e; // Rethrow exception to handle it outside
+	     }
+
+	     return rowsAffected;
 	 }
-	 
-	 
-	 
-	 
-	 
-	 
-	 // get empoy
+                              
+ // get empoy
 	 
 	 public static Employee getEmpById(int id) throws SQLException{
 
@@ -153,6 +233,8 @@ public class EmployeeDao {
 
 			// Step 4: Process the ResultSet object.
 			while (rs.next()) {
+				
+				
 				id = rs.getInt("EMPLOYEEID");
 				int otp = rs.getInt("OTP");
 				String firstName = rs.getString("firstName");
@@ -165,7 +247,8 @@ public class EmployeeDao {
 		        String phoneNumber = rs.getString("phoneNumber");
 		        String address = rs.getString("address");
 		        String status = rs.getString("status");
-		        Blob photo = rs.getBlob("employeePhoto");
+		        
+		        Blob photo = null;
 		        double leaveBalance = rs.getInt("leaveBalance");
 		        
 				employee = new Employee(id,otp,firstName,lastName,email,position,department,dateOfBirth,gender,phoneNumber,address,status,leaveBalance,photo);
@@ -208,7 +291,12 @@ public class EmployeeDao {
 		        String phoneNumber = rs.getString("phoneNumber");
 		        String address = rs.getString("address");
 		        String status = rs.getString("status");
-		        Blob photo = rs.getBlob("employeePhoto");
+		        
+		        //Blob photo = null;
+		        
+		        //rs.getBlob("employeePhoto");
+		        byte[] byteaData = rs.getBytes("EMPLOYEEPHOTO");
+		        Blob photo = convertByteArrayToBlob(byteaData);
 		        double leaveBalance = rs.getInt("leaveBalance");
 				employee = new Employee(id,otp,firstName,lastName,email,position,department,dateOfBirth,gender,phoneNumber,address,status,leaveBalance,photo);
 			}
@@ -256,7 +344,10 @@ public class EmployeeDao {
 			        String phoneNumber = rs.getString("phoneNumber");
 			        String address = rs.getString("address");
 			        String status = rs.getString("status");
-			        Blob photo = rs.getBlob("employeePhoto");
+			        Blob photo = null;
+			        		//rs.getBlob("employeePhoto");
+		            //preparedStatement.setNull(11, java.sql.Types.BLOB); // Set NULL if there is no photo
+
 			        double leaveBalance = rs.getInt("leaveBalance");
 			        int isAdmin = rs.getInt("ISADMIN"); 
 			        employee = new Employee(id,otp,firstName,lastName,email,position,department,dateOfBirth,gender,phoneNumber,address,status,leaveBalance,photo,isAdmin);
@@ -290,7 +381,8 @@ public class EmployeeDao {
 			            String phoneNumber = rs.getString("phoneNumber");
 			            String address = rs.getString("address");
 			            String status = rs.getString("status");
-			            Blob photo = rs.getBlob("employeePhoto");
+			            Blob photo = null;
+			            		//rs.getBlob("employeePhoto");
 			            double leaveBalance = rs.getDouble("leaveBalance");
 			            int isAdmin = rs.getInt("ISADMIN");
 			            
@@ -341,25 +433,50 @@ public class EmployeeDao {
 
 			// Step 4: Process the ResultSet object.
 			while (rs.next()) {
+			 //printResultSetAsKeyValue(rs);
+			 System.out.println("-----------------");
 				int id = rs.getInt("EMPLOYEEID");
-				String firstName = rs.getString("firstName");
-		        String lastName = rs.getString("lastName");
-		        String email = rs.getString("email");
-		        String position = rs.getString("position");
-		        String department = rs.getString("department");
-		        String dateOfBirth = rs.getString("dateOfBirth");
-		        String gender = rs.getString("gender");
-		        String phoneNumber = rs.getString("phoneNumber");
-		        String address = rs.getString("address");
-		        String status = rs.getString("status");
-		        Blob photo = rs.getBlob("employeePhoto");
-		        double leaveBalance = rs.getInt("leaveBalance");
+				String firstName = rs.getString("FIRSTNAME");
+		        String lastName = rs.getString("LASTNAME");
+		        String email = rs.getString("EMAIL");
+		        String position = rs.getString("POSITION");
+		        String department = rs.getString("DEPARTMENT");
+		        String dateOfBirth = rs.getString("DATEOFBIRTH");
+		        String gender = rs.getString("GENDER");
+		        String phoneNumber = rs.getString("PHONENUMBER");
+		        String address = rs.getString("ADDRESS");
+		        String status = rs.getString("STATUS");
+		        Blob photo = null;
+		        double leaveBalance = rs.getInt("LEAVEBALANCE");
 				employee.add(new Employee(id,firstName,lastName,email,position,department,dateOfBirth,gender,phoneNumber,address,status,leaveBalance,photo));
-			}
+			
+			 }
 			 
 			return employee;
 			}
 		}
+	 
+	 public static void printResultSetAsKeyValue(ResultSet rs) throws SQLException {
+		    // Get metadata to find out how many columns there are
+		    ResultSetMetaData metaData = rs.getMetaData();
+		    int columnCount = metaData.getColumnCount();
+
+		    // Iterate through the ResultSet and print each row as key-value pairs
+		    while (rs.next()) {
+		        Map<String, Object> row = new HashMap<>(); // Store key-value pairs for each row
+
+		        // Populate the map with column names and values
+		        for (int i = 1; i <= columnCount; i++) {
+		            String columnName = metaData.getColumnName(i);
+		            Object value = rs.getObject(i); // Get the value as an Object
+		            row.put(columnName, value); // Add to the map
+		        }
+
+		        // Print the key-value pairs for the current row
+		        System.out.println(row); // This prints the map as key-value pairs
+		    }
+		}
+
 	 
 	 
 	 // get employee and leave join
@@ -475,62 +592,120 @@ public class EmployeeDao {
 
 		    return employee;
 		}
-
+	 
+//	 static String JOIN_DATE = "SELECT e.*, l.* " +
+//             "FROM employee e " +
+//             "JOIN leave_history l ON e.employeeid = l.employee_id " +
+//             "WHERE STR_TO_DATE(?, 'DD-MM-YYYY') BETWEEN l.start_date AND l.end_date";
+//	 public static List<EmpLeave> selectEmpReqJoinDate(String dateString) throws SQLException {
+//		    List<EmpLeave> employee = new ArrayList<>();
+//		    
+//		    // Step 1: Establishing a Connectiodate
+//		    Connection_ con = new Connection_();
+//		    try (Connection connection = con.getc()) {
+//
+//		        // Step 2: Create a statement using connection object
+//		        PreparedStatement preparedStatement = connection.prepareStatement(JOIN_DATE);
+//		        System.out.println(preparedStatement);
+//
+//		        // Set the date parameter
+//		        //String dateString = "04-07-2024"; // your date string
+//		        preparedStatement.setString(1, dateString);
+//		        
+//		        // Step 3: Execute the query
+//		        ResultSet rs = preparedStatement.executeQuery();
+//
+//		        // Step 4: Process the ResultSet object
+//		        while (rs.next()) {
+//		            EmpLeave empLeave = new EmpLeave();
+//		            empLeave.setEmployeeId(rs.getInt("EMPLOYEEID"));
+//		            empLeave.setFirstName(rs.getString("FIRSTNAME"));
+//		            empLeave.setLastName(rs.getString("LASTNAME"));
+//		            empLeave.setEmail(rs.getString("EMAIL"));
+//		            empLeave.setPosition(rs.getString("POSITION"));
+//		            empLeave.setDepartment(rs.getString("DEPARTMENT"));
+//		            empLeave.setDateOfBirth(rs.getString("DATEOFBIRTH"));
+//		            empLeave.setGender(rs.getString("GENDER"));
+//		            empLeave.setPhoneNumber(rs.getString("PHONENUMBER"));
+//		            empLeave.setAddress(rs.getString("ADDRESS"));
+//		            empLeave.setEstatus(rs.getString("STATUS"));
+//		            empLeave.setLeaveBalance(rs.getDouble("LEAVEBALANCE"));
+//		            empLeave.setIsAdmin(rs.getInt("ISADMIN"));
+//		            empLeave.setLeaveId(rs.getInt("LEAVE_ID"));
+//		            empLeave.setLeaveType(rs.getString("LEAVE_TYPE"));
+//		            empLeave.setStartDate(rs.getString("START_DATE"));
+//		            empLeave.setEndDate(rs.getString("END_DATE"));
+//		            empLeave.setApplyDate(rs.getString("APPLY_DATE"));
+//		            empLeave.setReason(rs.getString("REASON"));
+//		            empLeave.setLstatus(rs.getString("STATUS"));
+//		            empLeave.setApprovalBy(rs.getInt("approval_by") + "");
+//		            empLeave.setApprovalDate(rs.getDate("approval_date") == null ? null : rs.getDate("approval_date").toLocaleString());
+//		            empLeave.setDuration(rs.getInt("DURATION"));
+//
+//		            employee.add(empLeave);
+//		        }
+//		    }
+//
+//		    return employee;
+//		}
+	 
 	 static String JOIN_DATE = "SELECT e.*, l.* " +
-             "FROM employee e " +
-             "JOIN leave_history l ON e.employeeid = l.employee_id " +
-             "WHERE TO_DATE(?, 'DD-MM-YYYY') BETWEEN l.start_date AND l.end_date";
-	 public static List<EmpLeave> selectEmpReqJoinDate(String dateString) throws SQLException {
-		    List<EmpLeave> employee = new ArrayList<>();
-		    
-		    // Step 1: Establishing a Connectiodate
-		    Connection_ con = new Connection_();
-		    try (Connection connection = con.getc()) {
+			    "FROM public.\"EMPLOYEE\" e " +
+			    "JOIN public.\"LEAVE_HISTORY\" l ON e.\"EMPLOYEEID\" = l.\"EMPLOYEE_ID\" " +
+			    "WHERE TO_DATE(?, 'DD-MM-YYYY') BETWEEN l.\"START_DATE\" AND l.\"END_DATE\"";
 
-		        // Step 2: Create a statement using connection object
-		        PreparedStatement preparedStatement = connection.prepareStatement(JOIN_DATE);
-		        System.out.println(preparedStatement);
+public static List<EmpLeave> selectEmpReqJoinDate(String dateString) throws SQLException {
+    List<EmpLeave> employee = new ArrayList<>();
+    
+    // Establishing a Connection
+    Connection_ con = new Connection_();
+    try (Connection connection = con.getc();
+         PreparedStatement preparedStatement = connection.prepareStatement(JOIN_DATE)) {
 
-		        // Set the date parameter
-		        //String dateString = "04-07-2024"; // your date string
-		        preparedStatement.setString(1, dateString);
-		        
-		        // Step 3: Execute the query
-		        ResultSet rs = preparedStatement.executeQuery();
+        // Set the date parameter
+        preparedStatement.setString(1, dateString);
+        
+        // Execute the query
+        try (ResultSet rs = preparedStatement.executeQuery()) {
 
-		        // Step 4: Process the ResultSet object
-		        while (rs.next()) {
-		            EmpLeave empLeave = new EmpLeave();
-		            empLeave.setEmployeeId(rs.getInt("EMPLOYEEID"));
-		            empLeave.setFirstName(rs.getString("FIRSTNAME"));
-		            empLeave.setLastName(rs.getString("LASTNAME"));
-		            empLeave.setEmail(rs.getString("EMAIL"));
-		            empLeave.setPosition(rs.getString("POSITION"));
-		            empLeave.setDepartment(rs.getString("DEPARTMENT"));
-		            empLeave.setDateOfBirth(rs.getString("DATEOFBIRTH"));
-		            empLeave.setGender(rs.getString("GENDER"));
-		            empLeave.setPhoneNumber(rs.getString("PHONENUMBER"));
-		            empLeave.setAddress(rs.getString("ADDRESS"));
-		            empLeave.setEstatus(rs.getString("STATUS"));
-		            empLeave.setLeaveBalance(rs.getDouble("LEAVEBALANCE"));
-		            empLeave.setIsAdmin(rs.getInt("ISADMIN"));
-		            empLeave.setLeaveId(rs.getInt("LEAVE_ID"));
-		            empLeave.setLeaveType(rs.getString("LEAVE_TYPE"));
-		            empLeave.setStartDate(rs.getString("START_DATE"));
-		            empLeave.setEndDate(rs.getString("END_DATE"));
-		            empLeave.setApplyDate(rs.getString("APPLY_DATE"));
-		            empLeave.setReason(rs.getString("REASON"));
-		            empLeave.setLstatus(rs.getString("STATUS"));
-		            empLeave.setApprovalBy(rs.getInt("approval_by") + "");
-		            empLeave.setApprovalDate(rs.getDate("approval_date") == null ? null : rs.getDate("approval_date").toLocaleString());
-		            empLeave.setDuration(rs.getInt("DURATION"));
+            // Process the ResultSet object
+            while (rs.next()) {
+                EmpLeave empLeave = new EmpLeave();
+                empLeave.setEmployeeId(rs.getInt("EMPLOYEEID"));
+                empLeave.setFirstName(rs.getString("FIRSTNAME"));
+                empLeave.setLastName(rs.getString("LASTNAME"));
+                empLeave.setEmail(rs.getString("EMAIL"));
+                empLeave.setPosition(rs.getString("POSITION"));
+                empLeave.setDepartment(rs.getString("DEPARTMENT"));
+                empLeave.setDateOfBirth(rs.getString("DATEOFBIRTH"));
+                empLeave.setGender(rs.getString("GENDER"));
+                empLeave.setPhoneNumber(rs.getString("PHONENUMBER"));
+                empLeave.setAddress(rs.getString("ADDRESS"));
+                empLeave.setEstatus(rs.getString("STATUS"));
+                empLeave.setLeaveBalance(rs.getDouble("LEAVEBALANCE"));
+                empLeave.setIsAdmin(rs.getInt("ISADMIN"));
+                empLeave.setLeaveId(rs.getInt("LEAVE_ID"));
+                empLeave.setLeaveType(rs.getString("LEAVE_TYPE"));
+                empLeave.setStartDate(rs.getString("START_DATE"));
+                empLeave.setEndDate(rs.getString("END_DATE"));
+                empLeave.setApplyDate(rs.getString("APPLY_DATE"));
+                empLeave.setReason(rs.getString("REASON"));
+                empLeave.setLstatus(rs.getString("STATUS"));
+                empLeave.setApprovalBy(rs.getString("approval_by"));
+                empLeave.setApprovalDate(rs.getDate("approval_date") == null ? null : rs.getDate("approval_date").toString());
+                empLeave.setDuration(rs.getInt("DURATION"));
 
-		            employee.add(empLeave);
-		        }
-		    }
+                employee.add(empLeave);
+            }
+        }
+    } catch (SQLException e) {
+        // Handle SQL exception
+        e.printStackTrace();
+        throw e;  // rethrow or handle as appropriate
+    }
+    return employee;
+}
 
-		    return employee;
-		}
 	 
 	 
 	 public static String convertDateFormat(String inputDate) {
@@ -618,7 +793,7 @@ public class EmployeeDao {
 		 
 		// Update Employ 2
 		 
-			 public static int UpdateEmploy3(Employee emp) throws SQLIntegrityConstraintViolationException,SQLException  {
+			 public static int UpdateEmploy3(Employee emp) throws SQLIntegrityConstraintViolationException,SQLException,IOException,Exception  {
 				 int rowsAffected = 0;
 				 String Error = " ";
 				
@@ -639,11 +814,22 @@ public class EmployeeDao {
 		         preparedStatement.setString(9, emp.getAddress());
 		         preparedStatement.setString(10, emp.getStatus());
 		         
+//		         if(emp.employeePhotoo != null) {
+//		        	 preparedStatement.setBlob(11, emp.employeePhotoo); 
+//		         }else {
+//			         preparedStatement.setBlob(11, emp.getEmployeePhoto()); 
+//		         }
+		         
 		         if(emp.employeePhotoo != null) {
-		        	 preparedStatement.setBlob(11, emp.employeePhotoo); 
+		        	 var t1 = inputStreamToByteArray(emp.employeePhotoo.getBinaryStream());
+		        	 preparedStatement.setBytes(11,t1); 
 		         }else {
-			         preparedStatement.setBlob(11, emp.getEmployeePhoto()); 
+					 var t1 = inputStreamToByteArray(emp.getEmployeePhoto());
+			         preparedStatement.setBytes(11, t1); 
 		         }
+		         
+		         
+
 		         
 		         preparedStatement.setInt(12, emp.getIsAdmin());
 		         
@@ -770,6 +956,30 @@ public class EmployeeDao {
 	   public static void removeSpinner(HttpServletResponse response) throws IOException {
 	        // Send JavaScript code to remove loader spinner
 	        response.getWriter().println("<script>document.getElementById('loader').style.display = 'none';</script>");
+	    }
+	   
+	   public static byte[] inputStreamToByteArray(InputStream inputStream) throws IOException {
+		    if (inputStream == null) {
+		        return null;
+		    }
+		    
+		    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+		        byte[] buffer = new byte[1024]; // Buffer size can be adjusted
+		        int bytesRead;
+		        while ((bytesRead = inputStream.read(buffer)) != -1) {
+		            byteArrayOutputStream.write(buffer, 0, bytesRead);
+		        }
+		        return byteArrayOutputStream.toByteArray();
+		    }
+	   }
+	   
+	    // Method to convert byte[] (bytea) to Blob without using Connection
+	    public static Blob convertByteArrayToBlob(byte[] byteaData) throws SQLException {
+	        if (byteaData != null) {
+	            return new SerialBlob(byteaData);  // Create Blob from byte array
+	        } else {
+	            return null; // Return null if the byte array is null
+	        }
 	    }
 	     
 }

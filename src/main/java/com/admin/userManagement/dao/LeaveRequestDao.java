@@ -26,47 +26,85 @@ public class LeaveRequestDao {
 	
 	
 	public static int  removed = 0;
-	// Assuming you are using PreparedStatement
-	private static final String INSERT_LEAVE_SQL = "INSERT INTO leave_history (employee_id, leave_type, start_date, end_date, apply_date, reason, status) " +
-	            "VALUES (?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?)";
-
-	private static final String INSERT_LEAVE_SQL2 = "INSERT INTO leave_history (employee_id, leave_type, start_date, end_date, reason, status,duration) " +
-            "VALUES (?, ?, ?, ?, ?, ?,?)";
-
-	// Beetween Date
-	private static final String BY_EMP_ID_SQL = "select * from leave_history where employee_id=?";
+//	// Assuming you are using PreparedStatement
+//	private static final String INSERT_LEAVE_SQL = "INSERT INTO leave_history (employee_id, leave_type, start_date, end_date, apply_date, reason, status) " +
+//	            "VALUES (?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?)";
+//
+//	private static final String INSERT_LEAVE_SQL2 = "INSERT INTO leave_history (employee_id, leave_type, start_date, end_date, reason, status,duration) " +
+//            "VALUES (?, ?, ?, ?, ?, ?,?)";
+//
+//	// Beetween Date
+//	private static final String BY_EMP_ID_SQL = "select * from leave_history where employee_id=?";
+//	
+//	// Beetween Date
+//	private static final String ALL_EMP_REQUEST_SQL = "select * from leave_history";
+//		
+//	
+//	 private static final String SELECT_ALL_EMPLOY  = "SELECT * from Employee";
+//	 
+//	 private static final String GET_EMPLOY_ID = "SELECT * from Employee WHERE employeeID = ?";
+//
+//	 private static final String GET_LEAVE_ID_SQL = "SELECT * from leave_history WHERE LEAVE_ID = ?";
+//
+//	 private static final String ACCEPT_LEAVE_BY_ID_SQL = "UPDATE leave_history SET status = ?, approval_by = ?, approval_date = ? WHERE LEAVE_ID = ?";
+//
+//	 private static final String RESET_LEAVE_BALANCE_SQL = "UPDATE Employee SET LEAVEBALANCE = ?";
+//
+//	 private static final String RESET_LEAVE_BALANCE_ID_SQL = "UPDATE Employee SET LEAVEBALANCE = ? WHERE employeeID = ?";
+//
+//	 
+//	 private static final String GET_EMPLOY_EMAIL = "SELECT * from Employee WHERE Email = ?";
+//
+//	 
+//	 private static final String UPDATE_EMPLOY = "UPDATE Employee SET FirstName = ? WHERE employeeID = ?";
+//	 
+//	 private static final String UPDATE_EMPLOY2 = "UPDATE Employee SET FirstName = ?, LastName = ?, Email = ?, Position = ?, Department = ?, "
+//             + "DateOfBirth = ?, Gender = ?, PhoneNumber = ?, Address = ?, Status = ?,EMPLOYEEPHOTO=? WHERE employeeID = ?";
+//
+//	 private static final String UPDATE_LEAVE_BALANCE_SQL = "update Employee set leaveBalance=? WHERE employeeID = ?" ;
+//	 
+//	 
+//	 private static final String SELECT_LEAVE_EMPLOY_JOIN_SQL  = "SELECT * from Employee";
+//	private static final String SELECT_EMAIL_FROM_EMPLOY = "SELECT Email from Employee";
+//	 
 	
-	// Beetween Date
-	private static final String ALL_EMP_REQUEST_SQL = "select * from leave_history";
-		
-	
-	 private static final String SELECT_ALL_EMPLOY  = "SELECT * from Employee";
-	 
-	 private static final String GET_EMPLOY_ID = "SELECT * from Employee WHERE employeeID = ?";
+	private static final String INSERT_LEAVE_SQL = "INSERT INTO \"LEAVE_HISTORY\" (\"EMPLOYEE_ID\", \"LEAVE_TYPE\", \"START_DATE\", \"END_DATE\", \"APPLY_DATE\", \"REASON\", \"STATUS\") " +
+            "VALUES (?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), ?, ?)";
 
-	 private static final String GET_LEAVE_ID_SQL = "SELECT * from leave_history WHERE LEAVE_ID = ?";
+private static final String INSERT_LEAVE_SQL2 = "INSERT INTO \"LEAVE_HISTORY\" (\"EMPLOYEE_ID\", \"LEAVE_TYPE\", \"START_DATE\", \"END_DATE\", \"REASON\", \"STATUS\", \"DURATION\") " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-	 private static final String ACCEPT_LEAVE_BY_ID_SQL = "UPDATE leave_history SET status = ?, approval_by = ?, approval_date = ? WHERE LEAVE_ID = ?";
+// Between Date
+private static final String BY_EMP_ID_SQL = "SELECT * FROM \"LEAVE_HISTORY\" WHERE \"EMPLOYEE_ID\" = ?";
 
-	 private static final String RESET_LEAVE_BALANCE_SQL = "UPDATE Employee SET LEAVEBALANCE = ?";
+// All Employee Requests
+private static final String ALL_EMP_REQUEST_SQL = "SELECT * FROM \"LEAVE_HISTORY\"";
 
-	 private static final String RESET_LEAVE_BALANCE_ID_SQL = "UPDATE Employee SET LEAVEBALANCE = ? WHERE employeeID = ?";
+private static final String SELECT_ALL_EMPLOY = "SELECT * FROM \"EMPLOYEE\"";
 
-	 
-	 private static final String GET_EMPLOY_EMAIL = "SELECT * from Employee WHERE Email = ?";
+private static final String GET_EMPLOY_ID = "SELECT * FROM \"EMPLOYEE\" WHERE \"EMPLOYEEID\" = ?";
 
-	 
-	 private static final String UPDATE_EMPLOY = "UPDATE Employee SET FirstName = ? WHERE employeeID = ?";
-	 
-	 private static final String UPDATE_EMPLOY2 = "UPDATE Employee SET FirstName = ?, LastName = ?, Email = ?, Position = ?, Department = ?, "
-             + "DateOfBirth = ?, Gender = ?, PhoneNumber = ?, Address = ?, Status = ?,EMPLOYEEPHOTO=? WHERE employeeID = ?";
+private static final String GET_LEAVE_ID_SQL = "SELECT * FROM \"LEAVE_HISTORY\" WHERE \"LEAVE_ID\" = ?";
 
-	 private static final String UPDATE_LEAVE_BALANCE_SQL = "update Employee set leaveBalance=? WHERE employeeID = ?" ;
-	 
-	 
-	 private static final String SELECT_LEAVE_EMPLOY_JOIN_SQL  = "SELECT * from Employee";
-	private static final String SELECT_EMAIL_FROM_EMPLOY = "SELECT Email from Employee";
-	 
+private static final String ACCEPT_LEAVE_BY_ID_SQL = "UPDATE \"LEAVE_HISTORY\" SET \"STATUS\" = ?, \"APPROVAL_BY\" = ?, \"APPROVAL_DATE\" = ? WHERE \"LEAVE_ID\" = ?";
+
+private static final String RESET_LEAVE_BALANCE_SQL = "UPDATE \"EMPLOYEE\" SET \"LEAVEBALANCE\" = ?";
+
+private static final String RESET_LEAVE_BALANCE_ID_SQL = "UPDATE \"EMPLOYEE\" SET \"LEAVEBALANCE\" = ? WHERE \"EMPLOYEEID\" = ?";
+
+private static final String GET_EMPLOY_EMAIL = "SELECT * FROM \"EMPLOYEE\" WHERE \"EMAIL\" = ?";
+
+private static final String UPDATE_EMPLOY = "UPDATE \"EMPLOYEE\" SET \"FIRSTNAME\" = ? WHERE \"EMPLOYEEID\" = ?";
+
+private static final String UPDATE_EMPLOY2 = "UPDATE \"EMPLOYEE\" SET \"FIRSTNAME\" = ?, \"LASTNAME\" = ?, \"EMAIL\" = ?, \"POSITION\" = ?, \"DEPARTMENT\" = ?, " +
+            "\"DATEOFBIRTH\" = ?, \"GENDER\" = ?, \"PHONENUMBER\" = ?, \"ADDRESS\" = ?, \"STATUS\" = ?, \"EMPLOYEEPHOTO\" = ? WHERE \"EMPLOYEEID\" = ?";
+
+private static final String UPDATE_LEAVE_BALANCE_SQL = "UPDATE \"EMPLOYEE\" SET \"LEAVEBALANCE\" = ? WHERE \"EMPLOYEEID\" = ?";
+
+private static final String SELECT_LEAVE_EMPLOY_JOIN_SQL = "SELECT * FROM \"EMPLOYEE\"";
+
+private static final String SELECT_EMAIL_FROM_EMPLOY = "SELECT \"EMAIL\" FROM \"EMPLOYEE\"";
+
 	 
 	 // apply for leave
 	 public static int inserLeaveRequest(LeaveRequestBean leaveRequest) throws SQLIntegrityConstraintViolationException,SQLException  {

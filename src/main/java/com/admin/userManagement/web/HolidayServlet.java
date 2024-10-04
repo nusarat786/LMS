@@ -66,7 +66,7 @@ public class HolidayServlet extends HttpServlet {
             String holidayDate = request.getParameter("holiday_date");
             String holidayDescription = request.getParameter("holiday_description");
             
-            String sql = "INSERT INTO Holiday (holiday_name, holiday_date, holiday_description) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO public.\"HOLIDAY\" (\"HOLIDAY_NAME\", \"HOLIDAY_DATE\", \"HOLIDAY_DESCRIPTION\") VALUES (?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(sql);
                 pstmt.setString(1, holidayName);
                 pstmt.setDate(2,Date.valueOf(holidayDate));
@@ -119,7 +119,7 @@ public class HolidayServlet extends HttpServlet {
             String holidayDate = request.getParameter("holiday_date");
             String holidayDescription = request.getParameter("holiday_description");
             String holiday_date_to_up = request.getParameter("holiday_date_to_up");
-            String sql = "UPDATE Holiday SET holiday_name=?, holiday_date=?, holiday_description=? WHERE holiday_date=?";
+            String sql = "UPDATE public.\"HOLIDAY\" SET \"HOLIDAY_NAME\"=?, \"HOLIDAY_DATE\"=?, \"HOLIDAY_DESCRIPTION\"=? WHERE \"HOLIDAY_DATE\"=?";
             PreparedStatement pstmt = connection.prepareStatement(sql);
                 pstmt.setString(1, holidayName);
                 pstmt.setDate(2, java.sql.Date.valueOf(holidayDate));
@@ -149,7 +149,7 @@ public class HolidayServlet extends HttpServlet {
     	try (Connection connection = getConnection()) {
             String holiday_date_to_up = request.getParameter("holiday_date_to_up");
 
-            String sql = "DELETE FROM Holiday WHERE holiday_date=?";
+            String sql = "DELETE FROM public.\"HOLIDAY\" WHERE \"HOLIDAY_DATE\"=?";
             try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 pstmt.setDate(1, java.sql.Date.valueOf(holiday_date_to_up));
 
